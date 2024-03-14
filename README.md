@@ -5,6 +5,11 @@ This repository contains general purpose utilities for various programming langu
 
 # Build Instructions
 
+## .NET / C#
+
+.NET source code in this repository requires [.NET 8 SDK or later](https://dotnet.microsoft.com/en-us/download/dotnet).
+.NET solutions in this repository are created and built using Visual Studio 2022.
+
 
 # Related Information
 
