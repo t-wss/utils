@@ -8,6 +8,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Global Files", "Global File
 		../../.gitignore = ../../.gitignore
 		../../directory.packages.props = ../../directory.packages.props
 	EndProjectSection
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Twss.SetGame", "../Twss.SetGame/Twss.SetGame.csproj", "{9B7C39C9-9D91-4E65-AEE6-F6B459061C36}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Twss.SetGame.Tests", "../../tests/Twss.SetGame.Tests/Twss.SetGame.Tests.csproj", "{244D15D6-3FE2-40B9-A54D-E575AACB41F0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Twss.Utils", "../Twss.Utils/Twss.Utils.csproj", "{08242D01-9246-4A68-9C7D-BB09BF8530C3}"
 EndProject
@@ -19,6 +22,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9B7C39C9-9D91-4E65-AEE6-F6B459061C36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B7C39C9-9D91-4E65-AEE6-F6B459061C36}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B7C39C9-9D91-4E65-AEE6-F6B459061C36}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B7C39C9-9D91-4E65-AEE6-F6B459061C36}.Release|Any CPU.Build.0 = Release|Any CPU
+		{244D15D6-3FE2-40B9-A54D-E575AACB41F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{244D15D6-3FE2-40B9-A54D-E575AACB41F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{244D15D6-3FE2-40B9-A54D-E575AACB41F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{244D15D6-3FE2-40B9-A54D-E575AACB41F0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{08242D01-9246-4A68-9C7D-BB09BF8530C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{08242D01-9246-4A68-9C7D-BB09BF8530C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{08242D01-9246-4A68-9C7D-BB09BF8530C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
