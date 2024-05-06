@@ -12,7 +12,7 @@ public class Program
 {
   #region ALGORITHM PARAMETERS
 
-  public const int DeckSize = 6;
+  public const int DeckSize = 21;
 
   public static readonly SetCard[]? Include = null;
 
@@ -45,7 +45,7 @@ public class Program
   {
     InitializeCtrlCHandler();
 
-    IAlgorithm algorithm = new BasicAlgorithm();
+    IAlgorithm algorithm = new SetChallenge.IncrementalAlgorithms.Algorithm1();
     algorithm.DeckEvaluatedCallback = HandleDeckEvaluated;
 
     WriteProlog(algorithm, DeckSize);
