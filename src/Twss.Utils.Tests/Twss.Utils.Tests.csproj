@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/Twss.Utils/Twss.Utils.csproj" />
+    <ProjectReference Include="../Twss.Utils/Twss.Utils.csproj" />
   </ItemGroup>
 
 </Project>
