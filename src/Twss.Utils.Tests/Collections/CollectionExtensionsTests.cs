@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using FluentAssertions;
+
 using Xunit;
 
 
@@ -36,29 +37,30 @@ public class CollectionExtensionsTests
           break;
       }
 
-      idx.Should().BeGreaterThanOrEqualTo(0);
+      Assert.True(idx >= 0);
 
       // Remove match from expected => next combination must be one of the remaining expected combinations.
       expected.RemoveAt(idx);
     }
 
     // All expected combinations found.
-    expected.Count.Should().Be(0);
+    Assert.Empty(expected);
   }
 
   // Use n = 6 as example.
   [Fact]
+  [SuppressMessage("Assertions", "xUnit2013:Do not use equality check to check for collection size.", Justification = "Source code uniformity.")]
   public void EnumerateNChooseK_ShouldReturnBinomialCoefficientNumberOfElements()
   {
     List<int> listOf6 = Enumerable.Range(0, 6).ToList();
 
-    listOf6.EnumerateNChooseK(0).Count().Should().Be(1);
-    listOf6.EnumerateNChooseK(1).Count().Should().Be(6 / 1);
-    listOf6.EnumerateNChooseK(2).Count().Should().Be(6 * 5 / 2 / 1);
-    listOf6.EnumerateNChooseK(3).Count().Should().Be(6 * 5 * 4 / 3 / 2 / 1);
-    listOf6.EnumerateNChooseK(4).Count().Should().Be(6 * 5 * 4 * 3 / 4 / 3 / 2 / 1);
-    listOf6.EnumerateNChooseK(5).Count().Should().Be(6 * 5 * 4 * 3 * 2 / 5 / 4 / 3 / 2 / 1);
-    listOf6.EnumerateNChooseK(6).Count().Should().Be(1);
+    Assert.Equal(1, listOf6.EnumerateNChooseK(0).Count());
+    Assert.Equal(6 / 1, listOf6.EnumerateNChooseK(1).Count());
+    Assert.Equal(6 * 5 / 2 / 1, listOf6.EnumerateNChooseK(2).Count());
+    Assert.Equal(6 * 5 * 4 / 3 / 2 / 1, listOf6.EnumerateNChooseK(3).Count());
+    Assert.Equal(6 * 5 * 4 * 3 / 4 / 3 / 2 / 1, listOf6.EnumerateNChooseK(4).Count());
+    Assert.Equal(6 * 5 * 4 * 3 * 2 / 5 / 4 / 3 / 2 / 1, listOf6.EnumerateNChooseK(5).Count());
+    Assert.Equal(1, listOf6.EnumerateNChooseK(6).Count());
   }
 
   [Fact]
