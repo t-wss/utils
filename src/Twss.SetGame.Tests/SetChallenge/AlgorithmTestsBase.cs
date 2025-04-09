@@ -3,9 +3,8 @@ using System.Linq;
 using System.Runtime;
 using System.Threading;
 using System.Threading.Tasks;
-using FluentAssertions;
+
 using Xunit;
-using Xunit.Abstractions;
 
 
 namespace Twss.SetGame.SetChallenge;
@@ -14,8 +13,7 @@ namespace Twss.SetGame.SetChallenge;
 #pragma warning disable SYSLIB0046 // ControlledExecution.Run should not be used
 
 
-// Currently, Xunit (as of v2.7) doesn't have an [Explicit] attribute like NUnit;
-// long-running tests are commented out; uncomment locally to run manually.
+// Long-running tests are commented out; uncomment locally to run manually.
 
 /// <summary>Provides basic tests for an <see cref="IAlgorithm"/> implementation.</summary>
 public abstract class AlgorithmTestsBase
@@ -52,18 +50,18 @@ public abstract class AlgorithmTestsBase
     IAlgorithm algorithm = CreateAlgorithm();
     algorithm.DeckEvaluatedCallback = (deck, combinationsTested, combinationsAreSets) =>
     {
-      SetCard.CheckDeckValid(deck).Should().BeTrue();
-      combinationsTested.Should().BeGreaterThanOrEqualTo(0);
-      combinationsAreSets.Should().BeGreaterThanOrEqualTo(0);
-      combinationsAreSets.Should().BeLessThanOrEqualTo(combinationsTested);
+      Assert.True(SetCard.CheckDeckValid(deck));
+      Assert.True(combinationsTested >= 0);
+      Assert.True(combinationsAreSets >= 0);
+      Assert.True(combinationsAreSets <= combinationsTested);
 
       statistics.AddOne(combinationsTested, combinationsAreSets);
     };
 
-    long result = await algorithm.RunAsync(deckSize, null, null);
+    long result = await algorithm.RunAsync(deckSize, null, null, TestContext.Current.CancellationToken);
 
     _output.WriteLine(statistics.ToString());
-    result.Should().Be(expectedDecksWithNoSets);
+    Assert.Equal(expectedDecksWithNoSets, result);
   }
 
   [Fact]
@@ -79,16 +77,16 @@ public abstract class AlgorithmTestsBase
       IAlgorithm algorithm = CreateAlgorithm();
       algorithm.DeckEvaluatedCallback = (deck, combinationsTested, combinationsAreSets) =>
       {
-        SetCard.CheckDeckValid(deck).Should().BeTrue();
-        combinationsTested.Should().BeGreaterThanOrEqualTo(0);
-        combinationsAreSets.Should().BeGreaterThanOrEqualTo(0);
-        combinationsAreSets.Should().BeLessThanOrEqualTo(combinationsTested);
+        Assert.True(SetCard.CheckDeckValid(deck));
+        Assert.True(combinationsTested >= 0);
+        Assert.True(combinationsAreSets >= 0);
+        Assert.True(combinationsAreSets <= combinationsTested);
       };
 
       algorithm.RunAsync(7, null, null, cts.Token)
         .ContinueWith(task =>
         {
-          // Completed/canceled is fine, an exception is rethrown.
+          // Completed/canceled is fine, any exception is rethrown.
           if (task.IsFaulted)
             throw task.Exception.InnerException ?? task.Exception;
         })
@@ -128,16 +126,16 @@ public abstract class AlgorithmTestsBase
     IAlgorithm algorithm = CreateAlgorithm();
     algorithm.DeckEvaluatedCallback = (deck, combinationsTested, combinationsAreSets) =>
     {
-      SetCard.CheckDeckValid(deck).Should().BeTrue();
-      combinationsTested.Should().BeGreaterThanOrEqualTo(0);
-      combinationsAreSets.Should().BeGreaterThanOrEqualTo(0);
-      combinationsAreSets.Should().BeLessThanOrEqualTo(combinationsTested);
+      Assert.True(SetCard.CheckDeckValid(deck));
+      Assert.True(combinationsTested >= 0);
+      Assert.True(combinationsAreSets >= 0);
+      Assert.True(combinationsAreSets <= combinationsTested);
 
-      deck.ContainsAny(exclude).Should().BeFalse();
+      Assert.DoesNotContain(exclude, deck);
     };
 
-    long result = await algorithm.RunAsync(4, null, exclude);
-    result.Should().Be(54);
+    long result = await algorithm.RunAsync(4, null, exclude, TestContext.Current.CancellationToken);
+    Assert.Equal(54, result);
   }
 
   /// <summary>Runs the algorithm for 5-card decks with 3 preselected cards which already form a set.
@@ -150,17 +148,17 @@ public abstract class AlgorithmTestsBase
     IAlgorithm algorithm = CreateAlgorithm();
     algorithm.DeckEvaluatedCallback = (deck, combinationsTested, combinationsAreSets) =>
     {
-      SetCard.CheckDeckValid(deck).Should().BeTrue();
-      combinationsTested.Should().BeGreaterThanOrEqualTo(0);
-      combinationsAreSets.Should().BeGreaterThanOrEqualTo(0);
-      combinationsAreSets.Should().BeLessThanOrEqualTo(combinationsTested);
+      Assert.True(SetCard.CheckDeckValid(deck));
+      Assert.True(combinationsTested >= 0);
+      Assert.True(combinationsAreSets >= 0);
+      Assert.True(combinationsAreSets <= combinationsTested);
 
       foreach (SetCard included in include)
-        deck.Contains(included).Should().BeTrue();
+        Assert.True(deck.Contains(included));
     };
 
-    long result = await algorithm.RunAsync(6, include, null);
-    result.Should().Be(0);
+    long result = await algorithm.RunAsync(6, include, null, TestContext.Current.CancellationToken);
+    Assert.Equal(0, result);
   }
 
   /// <summary>Runs algorithm for 'large' deck size, but constrains it with includes/excludes
@@ -178,14 +176,14 @@ public abstract class AlgorithmTestsBase
     IAlgorithm algorithm = CreateAlgorithm();
     algorithm.DeckEvaluatedCallback = (deck, combinationsTested, combinationsAreSets) =>
     {
-      SetCard.CheckDeckValid(deck).Should().BeTrue();
-      combinationsTested.Should().BeGreaterThanOrEqualTo(0);
-      combinationsAreSets.Should().BeGreaterThanOrEqualTo(0);
-      combinationsAreSets.Should().BeLessThanOrEqualTo(combinationsTested);
+      Assert.True(SetCard.CheckDeckValid(deck));
+      Assert.True(combinationsTested >= 0);
+      Assert.True(combinationsAreSets >= 0);
+      Assert.True(combinationsAreSets <= combinationsTested);
 
       foreach (SetCard included in include)
-        deck.Contains(included).Should().BeTrue();
-      deck.ContainsAny(exclude).Should().BeFalse();
+        Assert.True(deck.Contains(included));
+      Assert.False(deck.ContainsAny(exclude));
     };
 
     // Force abort when not completed in reasonable time.
