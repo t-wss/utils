@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
-using Twss.Utils.Collections;
 using Xunit;
+
+using Twss.Utils.Collections;
 
 
 namespace Twss.SetGame;
