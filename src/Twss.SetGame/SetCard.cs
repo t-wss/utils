@@ -166,7 +166,7 @@ public readonly struct SetCard : IEquatable<SetCard>
     return true;
   }
 
-  [Obsolete("CheckIsSet() is faster than this one.")]
+  // CheckIsSet() is faster than this one.
   public static bool CheckIsSetByProperties(SetCard card1, SetCard card2, SetCard card3)
   {
     bool expectShapeEqual = card1.Shape == card2.Shape;

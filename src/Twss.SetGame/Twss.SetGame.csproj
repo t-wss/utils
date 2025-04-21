@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="Twss.SetGame.Benchmarks" />
     <InternalsVisibleTo Include="Twss.SetGame.Tests" />
   </ItemGroup>
 
