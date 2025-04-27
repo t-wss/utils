@@ -5,8 +5,10 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
+using Twss.SetGame.SetChallenge.Algorithm0;
 
-namespace Twss.SetGame.SetChallenge.IncrementalAlgorithms;
+
+namespace Twss.SetGame.SetChallenge.Algorithm1;
 
 
 // Note: Tests show that in Release mode the Get*/Set* accessor methods are
@@ -27,7 +29,7 @@ public sealed class DeckBuffer
 
   public DeckBuffer(int deckSize, int bufferSize)
   {
-    if (deckSize < 0 || deckSize > SetCard.CardGame.Count)
+    if (deckSize < 0 || deckSize > SetCard.CardGame.Length)
       throw new ArgumentOutOfRangeException(nameof(deckSize));
     if (bufferSize < 1)
       throw new ArgumentOutOfRangeException($"{nameof(bufferSize)} must be at least 1.");

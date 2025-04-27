@@ -15,7 +15,7 @@ namespace Twss.SetGame.SetChallenge;
 
 // Long-running tests are commented out; uncomment locally to run manually.
 
-/// <summary>Provides basic tests for an <see cref="IAlgorithm"/> implementation.</summary>
+/// <summary>Provides basic tests for an <see cref="ISetChallenge"/> implementation.</summary>
 public abstract class AlgorithmTestsBase
 {
   #region CONSTANTS
@@ -34,7 +34,7 @@ public abstract class AlgorithmTestsBase
   }
 
   /// <summary>Creates a new instance of the algorithm which should be used in a test.</summary>
-  protected abstract IAlgorithm CreateAlgorithm();
+  protected abstract ISetChallenge CreateAlgorithm();
 
   [Theory]
   [InlineData(3, 84_240L)] // BasicAlgorithm ~ 15 - 50 ms
@@ -44,13 +44,13 @@ public abstract class AlgorithmTestsBase
   //[InlineData(7, 2_144_076_480L)] // BasicAlgorithm ~ 18 - ??? min
   public async Task RunAsync_ForAllDecks_ShouldReturnWellKnownResults(int deckSize, long expectedDecksWithNoSets)
   {
-    // Collect IAlgorithm.DeckEvaluatedCallback data; output at the end of the test for information purposes.
+    // Collect ISetChallenge.DeckEvaluatedCallback data; output at the end of the test for information purposes.
     DeckStatistics statistics = new DeckStatistics() { DeckSize = deckSize };
 
-    IAlgorithm algorithm = CreateAlgorithm();
+    ISetChallenge algorithm = CreateAlgorithm();
     algorithm.DeckEvaluatedCallback = (deck, combinationsTested, combinationsAreSets) =>
     {
-      Assert.True(SetCard.CheckDeckValid(deck));
+      Assert.True(SetMethods.CheckDeckValid(deck));
       Assert.True(combinationsTested >= 0);
       Assert.True(combinationsAreSets >= 0);
       Assert.True(combinationsAreSets <= combinationsTested);
@@ -74,10 +74,10 @@ public abstract class AlgorithmTestsBase
       // Cancel after a short amount of time (which is less than it takes to produce the result).
       using CancellationTokenSource cts = new(TimeSpan.FromMilliseconds(100.0));
 
-      IAlgorithm algorithm = CreateAlgorithm();
+      ISetChallenge algorithm = CreateAlgorithm();
       algorithm.DeckEvaluatedCallback = (deck, combinationsTested, combinationsAreSets) =>
       {
-        Assert.True(SetCard.CheckDeckValid(deck));
+        Assert.True(SetMethods.CheckDeckValid(deck));
         Assert.True(combinationsTested >= 0);
         Assert.True(combinationsAreSets >= 0);
         Assert.True(combinationsAreSets <= combinationsTested);
@@ -118,15 +118,16 @@ public abstract class AlgorithmTestsBase
   [Fact]
   public async Task RunAsync_WithExclude()
   {
-    SetCard[] exclude = Enumerable.Range(0, SetCard.CardGame.Count)
+    SetCard[] cardGame = SetCard.CardGame;
+    SetCard[] exclude = Enumerable.Range(0, cardGame.Length)
       .Where(i => i % 10 != 0)
-      .Select(i => SetCard.CardGame[i])
+      .Select(i => cardGame[i])
       .ToArray();
 
-    IAlgorithm algorithm = CreateAlgorithm();
+    ISetChallenge algorithm = CreateAlgorithm();
     algorithm.DeckEvaluatedCallback = (deck, combinationsTested, combinationsAreSets) =>
     {
-      Assert.True(SetCard.CheckDeckValid(deck));
+      Assert.True(SetMethods.CheckDeckValid(deck));
       Assert.True(combinationsTested >= 0);
       Assert.True(combinationsAreSets >= 0);
       Assert.True(combinationsAreSets <= combinationsTested);
@@ -145,10 +146,10 @@ public abstract class AlgorithmTestsBase
   {
     SetCard[] include = GetSetCards(0, 10, 20);
 
-    IAlgorithm algorithm = CreateAlgorithm();
+    ISetChallenge algorithm = CreateAlgorithm();
     algorithm.DeckEvaluatedCallback = (deck, combinationsTested, combinationsAreSets) =>
     {
-      Assert.True(SetCard.CheckDeckValid(deck));
+      Assert.True(SetMethods.CheckDeckValid(deck));
       Assert.True(combinationsTested >= 0);
       Assert.True(combinationsAreSets >= 0);
       Assert.True(combinationsAreSets <= combinationsTested);
@@ -162,10 +163,10 @@ public abstract class AlgorithmTestsBase
   }
 
   /// <summary>Runs algorithm for 'large' deck size, but constrains it with includes/excludes
-  /// (=> reasonable number of permutations); throws when running takes unacceptably long.</summary>
+  /// (=> reasonable number of 3-card combinations); throws when running takes unacceptably long.</summary>
   /// <remarks>
-  /// When the algorithm creates permutations of given deck size first and then filters for include/exclude,
-  /// it will take 'forever'; instead it must consider include/exclude when building permutations.
+  /// When the algorithm creates 3-card combinations of given deck size first and then filters for include/exclude,
+  /// it will take 'forever'; instead it must consider include/exclude when building combinations.
   /// </remarks>
   [Fact]
   public void RunAsync_WithIncludeExclude_ShouldNotTimeout()
@@ -173,10 +174,10 @@ public abstract class AlgorithmTestsBase
     SetCard[] include = GetSetCards(1, 3, 5, 14, 21);
     SetCard[] exclude = GetSetCards(0, 9, 10, 55);
 
-    IAlgorithm algorithm = CreateAlgorithm();
+    ISetChallenge algorithm = CreateAlgorithm();
     algorithm.DeckEvaluatedCallback = (deck, combinationsTested, combinationsAreSets) =>
     {
-      Assert.True(SetCard.CheckDeckValid(deck));
+      Assert.True(SetMethods.CheckDeckValid(deck));
       Assert.True(combinationsTested >= 0);
       Assert.True(combinationsAreSets >= 0);
       Assert.True(combinationsAreSets <= combinationsTested);
@@ -196,6 +197,7 @@ public abstract class AlgorithmTestsBase
 
   protected SetCard[] GetSetCards(params int[] indexes)
   {
-    return indexes.Select(idx => SetCard.CardGame[idx]).ToArray();
+    SetCard[] cardGame = SetCard.CardGame;
+    return indexes.Select(idx => cardGame[idx]).ToArray();
   }
 }

@@ -1,7 +1,7 @@
 using Xunit;
 
 
-namespace Twss.SetGame.SetChallenge.IncrementalAlgorithms;
+namespace Twss.SetGame.SetChallenge.Algorithm1;
 
 
 public class Algorithm1Tests : AlgorithmTestsBase
@@ -11,7 +11,7 @@ public class Algorithm1Tests : AlgorithmTestsBase
   {
   }
 
-  protected override IAlgorithm CreateAlgorithm()
+  protected override ISetChallenge CreateAlgorithm()
   {
     return new Algorithm1();
   }

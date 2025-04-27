@@ -30,7 +30,7 @@ public class Program
   private static SetCard[]? _deckWithNoSetsExample = null;
 
   /// <summary>Array of <see cref="DeckStatistics"/>; array index represents deck size.</summary>
-  private static DeckStatistics[] _statistics = Enumerable.Range(0, SetCard.CardGame.Count + 1)
+  private static DeckStatistics[] _statistics = Enumerable.Range(0, SetCard.CardGame.Length + 1)
     .Select(i => new DeckStatistics() { DeckSize = i })
     .ToArray();
 
@@ -46,7 +46,7 @@ public class Program
   {
     InitializeCtrlCHandler();
 
-    IAlgorithm algorithm = new SetChallenge.IncrementalAlgorithms.Algorithm1();
+    ISetChallenge algorithm = new SetChallenge.Algorithm1.Algorithm1();
     algorithm.DeckEvaluatedCallback = HandleDeckEvaluated;
 
     WriteProlog(algorithm, DeckSize);
@@ -155,7 +155,7 @@ public class Program
     Console.WriteLine(text);
   }
 
-  private static void WriteProlog(IAlgorithm algorithm, int deckSize)
+  private static void WriteProlog(ISetChallenge algorithm, int deckSize)
   {
     WriteLine($"Run algorithm {algorithm.GetType().Name}.");
     WriteLine($"Evaluating {deckSize} cards per deck ...");

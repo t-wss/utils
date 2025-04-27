@@ -11,7 +11,7 @@ public class BasicAlgorithmTests : AlgorithmTestsBase
   {
   }
 
-  protected override IAlgorithm CreateAlgorithm()
+  protected override ISetChallenge CreateAlgorithm()
   {
     return new BasicAlgorithm();
   }

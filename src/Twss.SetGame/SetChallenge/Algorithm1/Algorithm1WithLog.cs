@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 
 
-namespace Twss.SetGame.SetChallenge.IncrementalAlgorithms;
+namespace Twss.SetGame.SetChallenge.Algorithm1;
 
 
 /// <summary>Only for development purposes.</summary>

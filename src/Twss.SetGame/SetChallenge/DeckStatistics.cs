@@ -2,7 +2,7 @@ namespace Twss.SetGame.SetChallenge;
 
 
 /// <summary>Provides a container for statistical values when evaluating "Set" game decks.</summary>
-/// <seealso cref="IAlgorithm"/>
+/// <seealso cref="ISetChallenge"/>
 public record DeckStatistics
 {
   /// <summary>The number of cards per set deck these statistic values apply to.</summary>

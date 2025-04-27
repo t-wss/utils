@@ -7,10 +7,10 @@ using System.Threading;
 using System.Threading.Tasks;
 
 
-namespace Twss.SetGame.SetChallenge.IncrementalAlgorithms;
+namespace Twss.SetGame.SetChallenge.Algorithm0;
 
 
-/// <summary>Implementation of the "Set Challenge" (see <see cref="IAlgorithm"/>)
+/// <summary>Implementation of the "Set Challenge" (see <see cref="ISetChallenge"/>)
 /// which evaluates Set decks incrementally in batches.</summary>
 /// <remarks>
 /// <list type="bullet">
@@ -28,12 +28,7 @@ namespace Twss.SetGame.SetChallenge.IncrementalAlgorithms;
 /// also for those with a deck size lower than the specified size.</item>
 /// </list>
 /// </remarks>
-/// <devremarks>
-/// <para><see cref="RunAsync"/> is implemented using a template method pattern approach:
-/// The 'skeleton' of the algorithm is implemented as <c>protected virtual</c> methods;
-/// subclasses can override those methods and add to resp. modify the algorithm's behaviour.</para>
-/// </devremarks>
-public class Algorithm0 : IAlgorithm
+public class Algorithm0 : ISetChallenge
 {
   #region NESTED TYPES
 
@@ -55,7 +50,7 @@ public class Algorithm0 : IAlgorithm
     /// <para>A simple approach to avoid buffer starvation is to limit extension of smaller decks per iteration
     /// (although it is sub-optimal regarding performance).</para>
     /// <para>Adjust the value corresponding to nominal deck size and <see cref="BufferSize"/>.
-    /// When algorithm execution stalls (<see cref="IAlgorithm.DeckEvaluatedCallback"/> is not invoked anymore)
+    /// When algorithm execution stalls (<see cref="ISetChallenge.DeckEvaluatedCallback"/> is not invoked anymore)
     /// then the value is too high.</para>
     /// </remarks>
     internal const int ExtendDecksBelowNominalSizeCount = 100;
@@ -66,7 +61,7 @@ public class Algorithm0 : IAlgorithm
 
   #endregion NESTED TYPES
 
-  public IAlgorithm.DeckEvaluatedAction? DeckEvaluatedCallback { get; set; }
+  public ISetChallenge.DeckEvaluatedAction? DeckEvaluatedCallback { get; set; }
 
   /// <summary>Gets the nominal deck size to evaluate (as given in <see cref="RunAsync"/>).</summary>
   public int DeckSize { get; protected set; }
@@ -85,7 +80,7 @@ public class Algorithm0 : IAlgorithm
 
   public async Task<long> RunAsync(int deckSize, SetCard[]? include, SetCard[]? exclude, CancellationToken cancellationToken)
   {
-    BasicAlgorithm.ThrowIfRunArgsInvalid(deckSize, include, exclude);
+    ISetChallenge.ThrowIfRunArgsInvalid(deckSize, include, exclude);
 
     Initialize(deckSize, include, exclude);
 
@@ -104,7 +99,7 @@ public class Algorithm0 : IAlgorithm
 
   /// <summary>Initializes the instance from given <see cref="RunAsync"/> arguments.
   /// Fills the buffer with an initial collection of decks which are then going to be extended
-  /// (see also <see cref="Algorithm0"/> description).</summary>
+  /// (see also <see cref="Algorithm0"/> class description).</summary>
   protected virtual void Initialize(int deckSize, SetCard[]? include, SetCard[]? exclude)
   {
     DeckSize = deckSize;
@@ -164,7 +159,7 @@ public class Algorithm0 : IAlgorithm
   }
 
   /// <summary>Extends decks and adds them to the buffer until it is filled.
-  /// See also <see cref="Algorithm0"/> description.</summary>
+  /// See also <see cref="Algorithm0"/> class description.</summary>
   protected virtual void ExtendDecks()
   {
     // See parameter description for an explanation.
@@ -240,7 +235,10 @@ public class Algorithm0 : IAlgorithm
     {
       Debug.Assert(deckState.HasDeck);
 
-      (int combinationsTested, int combinationsAreSets) = BasicAlgorithm.ContainsSet(deckState.Deck!);
+      (int combinationsTested, int combinationsAreSets) = SetMethods.CountSets(
+        deckState.Deck!,
+        SetMethods.CheckIsSetBitOperations1,
+        true);
 
       deckState.CombinationsTested = combinationsTested;
       deckState.CombinationsAreSets = combinationsAreSets;
@@ -399,7 +397,7 @@ public class Algorithm0 : IAlgorithm
   /// </remarks>
   public static IEnumerable<SetCard[]> ExtendDeck(SetCard[] deck, SetCard[] cards)
   {
-    Debug.Assert(SetCard.CheckDeckValid(deck));
+    Debug.Assert(SetMethods.CheckDeckValid(deck));
 
     int maxCardIndex = deck[deck.Length - 1].Index;
     SetCard[] extendedDeck = new SetCard[deck.Length + 1];

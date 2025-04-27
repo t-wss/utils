@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 
@@ -11,193 +10,96 @@ namespace Twss.SetGame;
 /// <para>The static <see cref="CardGame"/> property contains the whole "Set" pack of cards (81 cards).
 /// The <see cref="Index"/> of a card is equal to the index position of the card in <see cref="CardGame"/>.</para>
 /// <para>An instance created using the <see langword="default"/> keyword is considered invalid;
-/// call <see cref="IsValid"/> to check.</para>
-/// </remarks>
-/// <seealso href="https://en.wikipedia.org/wiki/Set_(card_game)"/>
-/// <devremarks>
-/// <para>The <see cref="Id"/> property contains the bit-encoded values of the other SetCard properties:
+/// call <see cref="IsDefaultInitialized"/> to check.</para>
+/// <para>The <see cref="Id"/> property contains the bit-encoded values of all the other SetCard properties:
 /// <list type="bullet">
 /// <item>Bit 0-7: <see cref="Index"/></item>
 /// <item>Bit 8-13: <see cref="Shape"/></item>
 /// <item>Bit 14-19: <see cref="Count"/></item>
 /// <item>Bit 20-25: <see cref="Color"/></item>
 /// <item>Bit 26-31: <see cref="Shading"/></item>
-/// </list></para>
-/// </devremarks>
+/// </list>
+/// Every indiviual property value has a reserved space of 2 bits; this allows to evaluate card combinations
+/// for all card properties at once using bit operations.
+/// </para>
+/// </remarks>
+/// <seealso href="https://en.wikipedia.org/wiki/Set_(card_game)"/>
 public readonly struct SetCard : IEquatable<SetCard>
 {
-  private readonly int _id;
+  #region CONSTANTS
 
-  private SetCard(int index, SymbolShape shape, SymbolCount count, SymbolColor color, SymbolShading shading)
+  public const uint IndexBitMask = 0x000000FF;
+
+  public const uint SymbolColorBitMask = 0x03F00000;
+
+  public const uint SymbolCountBitMask = 0x000FC000;
+
+  public const uint SymbolShadingBitMask = 0xFC000000;
+
+  public const uint SymbolShapeBitMask = 0x00003F00;
+
+  #endregion CONSTANTS
+
+  private readonly uint _id;
+
+  private SetCard(uint index, SymbolShape shape, SymbolCount count, SymbolColor color, SymbolShading shading)
   {
     // Technically there's no need for argument checks as the constructor is private;
     // keep them anyways as 'documentation'.
-    if (index < 0 || index >= 81)
+    if (index >= 81)
       throw new ArgumentOutOfRangeException(nameof(index));
     if (shape != SymbolShape.Diamond && shape != SymbolShape.Squiggle && shape != SymbolShape.Oval)
-      throw new ArgumentException(nameof(shape));
+      throw new ArgumentException($"{nameof(shape)} must be one of Diamond, Squiggle or Oval.");
     if (count != SymbolCount.One && count != SymbolCount.Two && count != SymbolCount.Three)
-      throw new ArgumentException(nameof(count));
+      throw new ArgumentException($"{nameof(count)} must be one of One, Two or Three.");
     if (color != SymbolColor.Purple && color != SymbolColor.Green && color != SymbolColor.Red)
-      throw new ArgumentException(nameof(color));
+      throw new ArgumentException($"{nameof(color)} must be one of Purple, Green or Red.");
     if (shading != SymbolShading.Open && shading != SymbolShading.Solid && shading != SymbolShading.Striped)
-      throw new ArgumentException(nameof(shading));
+      throw new ArgumentException($"{nameof(shading)} must be one of Open, Solid or Striped.");
 
-    _id = index + (int)shape + (int)count  + (int)color + (int)shading;
+    _id = index + (uint)shape + (uint)count  + (uint)color + (uint)shading;
   }
 
   /// <summary>Gets the "Set" pack of cards (81 cards).</summary>
-  public static IReadOnlyList<SetCard> CardGame { get; } = CreateCardGame();
+  /// <remarks>Creates a new collection on every invocation.</remarks>
+  public static SetCard[] CardGame { get; } = CreateCardGame();
 
-  public readonly SymbolShape Shape => (SymbolShape)(_id & 0x00003F00);
+  public readonly SymbolColor Color
+  {
+    get => (SymbolColor)(_id & SymbolColorBitMask);
+  }
 
-  public readonly SymbolCount Count => (SymbolCount)(_id & 0x000FC000);
+  public readonly SymbolCount Count
+  {
+    get => (SymbolCount)(_id & SymbolCountBitMask);
+  }
 
-  public readonly SymbolColor Color => (SymbolColor)(_id & 0x03F00000);
-
-  public readonly SymbolShading Shading => (SymbolShading)(_id & 0xFC000000);
-
-  public readonly int Id => _id;
+  public readonly uint Id
+  {
+    get => _id;
+  }
 
   /// <summary>Gets the order index of the SetCard.</summary>
-  public readonly int Index => (_id & 0x000000FF);
-
-  /// <summary>Indicates whether the <see cref="SetCard"/> represents a valid card
-  /// or if it has been <see langword="default"/> initialized.</summary>
-  public bool IsValid => Id != 0;
-
-  /// <summary>Checks if a <paramref name="deck"/> is valid, i.e. not empty
-  /// and contains only distinct cards from <see cref="SetCard.CardGame"/>.</summary>
-  public static bool CheckDeckValid(ReadOnlySpan<SetCard> deck)
+  public readonly int Index
   {
-    int count = deck.Length;
-    if (count <= 0)
-      return false;
-
-    for (int i = 0; i < count; i++)
-    {
-      var card = deck[i];
-      int cardIndex = card.Index;
-      if (cardIndex < 0 || cardIndex >= CardGame.Count || !card.Equals(CardGame[cardIndex]))
-        return false;
-
-      for (int j = i - 1; j >= 0; j--)
-      {
-        if (card.Equals(deck[j]))
-          return false;
-      }
-    }
-
-    return true;
+    get => (int)(_id & IndexBitMask);
   }
 
-  public static bool CheckIsSet(SetCard card1, SetCard card2, SetCard card3)
+  /// <summary>Indicates whether the <see cref="SetCard"/> instance has been <see langword="default"/> initialized
+  /// (i.e. doesn't represent a valid card).</summary>
+  public bool IsDefaultInitialized
   {
-    // Every of the 4 features must have either 3 same values or 3 different values.
-    // Use the fact that enum values are laid out systematically: Add the ids then check the bit groups.
-    uint value = (uint)(card1.Id + card2.Id + card3.Id);
-
-    uint shapeValue = value & 0x00003F00;
-    if (shapeValue != 0x00000300 // 3 diamonds
-      && shapeValue != 0x00000C00 // 3 squiggles
-      && shapeValue != 0x00003000 // 3 ovals
-      && shapeValue != 0x00001500) // 1 diamond, 1 squiggle, 1 oval
-      return false;
-
-    uint countValue = value & 0x000FC000;
-    if (countValue != 0x0000C000 // 3 ones
-      && countValue != 0x00030000 // 3 twos
-      && countValue != 0x000C0000 // 3 threes
-      && countValue != 0x00054000) // 1 one, 1 two, 1 three
-      return false;
-
-    uint colorValue = value & 0x03F00000;
-    if (colorValue != 0x00300000 // 3 purples
-      && colorValue != 0x00C00000 // 3 greens
-      && colorValue != 0x03000000 // 3 reds
-      && colorValue != 0x01500000) // 1 purple, 1 green, 1 red
-      return false;
-
-    uint shadingValue = value & 0xFC000000;
-    if (shadingValue != 0x0C000000 // 3 open
-      && shadingValue != 0x30000000 // 3 solid
-      && shadingValue != 0xC0000000 // 3 striped
-      && shadingValue != 0x54000000) // 1 open, 1 solid, 1 striped
-      return false;
-
-    return true;
+    get => Id != 0;
   }
 
-  // Roughly same performance as CheckIsSet().
-  public static bool CheckIsSet2(SetCard card1, SetCard card2, SetCard card3)
+  public readonly SymbolShading Shading
   {
-    // Every of the 4 features must have either 3 same values or 3 different values.
-    // Use the fact that enum values are laid out systematically: Add the ids then check the bit groups.
-    uint value = (uint)(card1.Id + card2.Id + card3.Id);
-
-    uint shapeValue = (value & 0x00003F00) >> 8;
-    if (shapeValue != 0x00000003 // 3 diamonds
-      && shapeValue != 0x0000000C // 3 squiggles
-      && shapeValue != 0x00000030 // 3 ovals
-      && shapeValue != 0x00000015) // 1 diamond, 1 squiggle, 1 oval
-      return false;
-
-    uint countValue = (value & 0x000FC000) >> 14;
-    if (countValue != 0x00000003 // 3 ones
-      && countValue != 0x0000000C // 3 twos
-      && countValue != 0x00000030 // 3 threes
-      && countValue != 0x00000015) // 1 one, 1 two, 1 three
-      return false;
-
-    uint colorValue = (value & 0x03F00000) >> 20;
-    if (colorValue != 0x00000003 // 3 purples
-      && colorValue != 0x0000000C // 3 greens
-      && colorValue != 0x00000030 // 3 reds
-      && colorValue != 0x00000015) // 1 purple, 1 green, 1 red
-      return false;
-
-    uint shadingValue = (value & 0xFC000000) >> 26;
-    if (shadingValue != 0x00000003 // 3 open
-      && shadingValue != 0x0000000C // 3 solid
-      && shadingValue != 0x00000030 // 3 striped
-      && shadingValue != 0x00000015) // 1 open, 1 solid, 1 striped
-      return false;
-
-    return true;
+    get => (SymbolShading)(_id & SymbolShadingBitMask);
   }
 
-  // CheckIsSet() is faster than this one.
-  public static bool CheckIsSetByProperties(SetCard card1, SetCard card2, SetCard card3)
+  public readonly SymbolShape Shape
   {
-    bool expectShapeEqual = card1.Shape == card2.Shape;
-    bool shapeEqual = expectShapeEqual
-      ? (card2.Shape == card3.Shape)
-      : (card1.Shape != card3.Shape && card2.Shape != card3.Shape);
-    if (!shapeEqual)
-      return false;
-
-    bool expectCountEqual = card1.Count == card2.Count;
-    bool countEqual = expectCountEqual
-      ? (card2.Count == card3.Count)
-      : (card1.Count != card3.Count && card2.Count != card3.Count);
-    if (!countEqual)
-      return false;
-
-    bool expectColorEqual = card1.Color == card2.Color;
-    bool colorEqual = expectColorEqual
-      ? (card2.Color == card3.Color)
-      : (card1.Color != card3.Color && card2.Color != card3.Color);
-    if (!colorEqual)
-      return false;
-
-    bool expectShadingEqual = card1.Shading == card2.Shading;
-    bool shadingEqual = expectShadingEqual
-      ? (card2.Shading == card3.Shading)
-      : (card1.Shading != card3.Shading && card2.Shading != card3.Shading);
-    if (!shadingEqual)
-      return false;
-
-    return true;
+    get => (SymbolShape)(_id & SymbolShapeBitMask);
   }
 
   public bool Equals(SetCard other)
@@ -212,7 +114,7 @@ public readonly struct SetCard : IEquatable<SetCard>
 
   public override int GetHashCode()
   {
-    return Id;
+    return (int)Id;
   }
 
   public override string ToString()
@@ -233,7 +135,7 @@ public readonly struct SetCard : IEquatable<SetCard>
   private static SetCard[] CreateCardGame()
   {
     var packOfCards = new SetCard[81];
-    int i = 0;
+    uint i = 0;
 
     foreach (SymbolShape shape in new[] { SymbolShape.Diamond, SymbolShape.Squiggle, SymbolShape.Oval })
     {
@@ -252,36 +154,4 @@ public readonly struct SetCard : IEquatable<SetCard>
 
     return packOfCards;
   }
-}
-
-
-public enum SymbolShape
-{
-  Diamond = 0x00000100, // reserved space is bits 8-9
-  Squiggle = 0x00000400, // reserved space is bits 10-11
-  Oval = 0x00001000 // reserved space is bits 12-13
-}
-
-
-public enum SymbolCount
-{
-  One = 0x00004000, // reserved space is bits 14-15
-  Two = 0x00010000, // reserved space is bits 16-17
-  Three = 0x00040000 // reserved space is bits 18-19
-}
-
-
-public enum SymbolColor
-{
-  Purple = 0x00100000, // reserved space is bits 20-21
-  Green = 0x00400000, // reserved space is bits 22-23
-  Red = 0x01000000 // reserved space is bits 24-25
-}
-
-
-public enum SymbolShading
-{
-  Open = 0x04000000, // reserved space is bits 26-27
-  Solid = 0x10000000, // reserved space is bits 28-29
-  Striped = 0x40000000 // reserved space is bits 30-31
 }

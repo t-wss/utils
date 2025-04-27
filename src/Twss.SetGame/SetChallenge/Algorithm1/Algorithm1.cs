@@ -7,10 +7,10 @@ using System.Threading;
 using System.Threading.Tasks;
 
 
-namespace Twss.SetGame.SetChallenge.IncrementalAlgorithms;
+namespace Twss.SetGame.SetChallenge.Algorithm1;
 
 
-/// <summary>Implementation of the "Set Challenge" (see <see cref="IAlgorithm"/>)
+/// <summary>Implementation of the "Set Challenge" (see <see cref="ISetChallenge"/>)
 /// which evaluates Set decks incrementally in batches.</summary>
 /// <remarks>
 /// <list type="bullet">
@@ -33,12 +33,7 @@ namespace Twss.SetGame.SetChallenge.IncrementalAlgorithms;
 /// also for those with a deck size lower than the specified size.</item>
 /// </list>
 /// </remarks>
-/// <devremarks>
-/// <para><see cref="RunAsync"/> is implemented using a template method pattern approach:
-/// The 'skeleton' of the algorithm is implemented as <c>protected virtual</c> methods;
-/// subclasses can override those methods and add to resp. modify the algorithm's behaviour.</para>
-/// </devremarks>
-public class Algorithm1 : IAlgorithm
+public class Algorithm1 : ISetChallenge
 {
   #region NESTED TYPES
 
@@ -53,7 +48,7 @@ public class Algorithm1 : IAlgorithm
 
   #endregion NESTED TYPES
 
-  public IAlgorithm.DeckEvaluatedAction? DeckEvaluatedCallback { get; set; }
+  public ISetChallenge.DeckEvaluatedAction? DeckEvaluatedCallback { get; set; }
 
   /// <summary>Gets the nominal deck size to evaluate (as given in <see cref="RunAsync"/>).</summary>
   public int DeckSize => (Buffers != null) ? Buffers.Length - 1 : 0;
@@ -90,7 +85,7 @@ public class Algorithm1 : IAlgorithm
 
   public async Task<long> RunAsync(int deckSize, SetCard[]? include, SetCard[]? exclude, CancellationToken cancellationToken)
   {
-    BasicAlgorithm.ThrowIfRunArgsInvalid(deckSize, include, exclude);
+    ISetChallenge.ThrowIfRunArgsInvalid(deckSize, include, exclude);
 
     Initialize(deckSize, include, exclude);
 
@@ -127,7 +122,7 @@ public class Algorithm1 : IAlgorithm
   {
     DecksWithNoSetCount = 0L;
 
-    (SetCard[][] initialDecks, SetCard[] additionalCards) = Algorithm0.CreateInitialDecks(include, exclude);
+    (SetCard[][] initialDecks, SetCard[] additionalCards) = Algorithm0.Algorithm0.CreateInitialDecks(include, exclude);
 
     // Special case 'include': CreateInitialDecks() produces one initial deck (i.e. the include cards);
     // this cannot be fed into ExtendDecks() as-is later; instead create proper initial decks.
@@ -266,7 +261,7 @@ public class Algorithm1 : IAlgorithm
       if (sourceBuffer.GetCombinationsAreSets(i) == 0)
       {
         SetCard[] deck = sourceBuffer.Decks[i];
-        foreach (SetCard[] extended in Algorithm0.ExtendDeck(deck, CardsForExtend))
+        foreach (SetCard[] extended in Algorithm0.Algorithm0.ExtendDeck(deck, CardsForExtend))
           buffer.Add(extended);
       }
 
@@ -291,7 +286,10 @@ public class Algorithm1 : IAlgorithm
         if (buffer.GetHasBeenEvaluated(i))
           break;
 
-        (int combinationsTested, int combinationsAreSets) = BasicAlgorithm.ContainsSet(buffer.Decks[i]);
+        (int combinationsTested, int combinationsAreSets) = SetMethods.CountSets(
+          buffer.Decks[i],
+          SetMethods.CheckIsSetBitOperations1,
+          true);
         buffer.SetCombinationsTested(i, combinationsTested);
         buffer.SetCombinationsAreSets(i, combinationsAreSets);
         buffer.SetHasBeenEvaluated(i, true);

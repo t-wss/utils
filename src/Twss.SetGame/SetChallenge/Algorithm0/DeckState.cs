@@ -1,4 +1,4 @@
-namespace Twss.SetGame.SetChallenge.IncrementalAlgorithms;
+namespace Twss.SetGame.SetChallenge.Algorithm0;
 
 
 /// <summary>Manages evaluation state for a "Set" card deck.</summary>
