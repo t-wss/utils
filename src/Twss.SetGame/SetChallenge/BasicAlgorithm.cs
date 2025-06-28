@@ -27,7 +27,7 @@ public sealed class BasicAlgorithm : ISetChallenge
 
       (int combinationsTested, int combinationsAreSets) = SetMethods.CountSets(
         deck,
-        SetMethods.CheckIsSetBitOperations1,
+        SetMethods.CheckIsSetBitOperations,
         true);
 
       if (combinationsTested > 0 && combinationsAreSets == 0)

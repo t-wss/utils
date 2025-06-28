@@ -288,7 +288,7 @@ public class Algorithm1 : ISetChallenge
 
         (int combinationsTested, int combinationsAreSets) = SetMethods.CountSets(
           buffer.Decks[i],
-          SetMethods.CheckIsSetBitOperations1,
+          SetMethods.CheckIsSetBitOperations,
           true);
         buffer.SetCombinationsTested(i, combinationsTested);
         buffer.SetCombinationsAreSets(i, combinationsAreSets);

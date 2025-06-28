@@ -237,7 +237,7 @@ public class Algorithm0 : ISetChallenge
 
       (int combinationsTested, int combinationsAreSets) = SetMethods.CountSets(
         deckState.Deck!,
-        SetMethods.CheckIsSetBitOperations1,
+        SetMethods.CheckIsSetBitOperations,
         true);
 
       deckState.CombinationsTested = combinationsTested;

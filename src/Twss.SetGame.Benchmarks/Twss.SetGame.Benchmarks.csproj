@@ -25,12 +25,4 @@
     <ProjectReference Include="../Twss.SetGame/Twss.SetGame.csproj" />
   </ItemGroup>
 
-  <!-- Reuse Program.cs of Twss.Utils.Benchmarks. -->
-  <ItemGroup>
-    <Compile Remove="Program.cs" />
-    <Compile Include="../Twss.Utils.Benchmarks/Program.cs">
-      <Link>Program.cs</Link>
-    </Compile>
-  </ItemGroup>
-
 </Project>
