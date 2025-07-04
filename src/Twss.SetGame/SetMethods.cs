@@ -354,6 +354,40 @@ public static class SetMethods
     return (combinationsTested, combinationsAreSets);
   }
 
+  /// <inheritdoc cref="CountSets(SetCard[], bool)" />
+  public static (int combinationsTested, int combinationsAreSets) CountSets(
+    Span<SetCard> deck,
+    Func<SetCard, SetCard, SetCard, bool> checkIsSet,
+    bool returnOnFirstSet)
+  {
+    int combinationsTested = 0;
+    int combinationsAreSets = 0;
+
+    int deckSize = deck.Length;
+    Debug.Assert(deckSize > 0);
+
+    for (int i = 0; i < deckSize; i++)
+    {
+      for (int j = i + 1; j < deckSize; j++)
+      {
+        for (int k = j + 1; k < deckSize; k++)
+        {
+          combinationsTested++;
+
+          bool isSet = checkIsSet(deck[i], deck[j], deck[k]);
+          if (isSet)
+          {
+            combinationsAreSets++;
+            if (returnOnFirstSet)
+              break;
+          }
+        }
+      }
+    }
+
+    return (combinationsTested, combinationsAreSets);
+  }
+
   /// <summary>Enumerates all 3-card combinations (distinct cards)
   /// that can be formed from the given <paramref name="deck"/>.</summary>
   public static IEnumerable<(SetCard, SetCard, SetCard)> Get3CardCombinations(SetCard[] deck)
